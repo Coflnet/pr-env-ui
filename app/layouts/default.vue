@@ -3,55 +3,62 @@ const route = useRoute()
 const appConfig = useAppConfig()
 const { isHelpSlideoverOpen } = useDashboard()
 
-const links = [{
-  id: 'home',
-  label: 'Home',
-  icon: 'i-heroicons-home',
-  to: '/',
-  tooltip: {
-    text: 'Home',
-    shortcuts: ['G', 'H']
-  }
-}, {
-  id: 'inbox',
-  label: 'Inbox',
-  icon: 'i-heroicons-inbox',
-  to: '/inbox',
-  badge: '4',
-  tooltip: {
-    text: 'Inbox',
-    shortcuts: ['G', 'I']
-  }
-}, {
-  id: 'users',
-  label: 'Users',
-  icon: 'i-heroicons-user-group',
-  to: '/users',
-  tooltip: {
-    text: 'Users',
-    shortcuts: ['G', 'U']
-  }
-}, {
-  id: 'settings',
-  label: 'Settings',
-  to: '/settings',
-  icon: 'i-heroicons-cog-8-tooth',
-  children: [{
-    label: 'General',
+const links = [
+  {
+    id: 'home',
+    label: 'Home',
+    icon: 'i-heroicons-home',
+    to: '/',
+    tooltip: {
+      text: 'Home',
+      shortcuts: ['G', 'H']
+    }
+  },
+  {
+    id: 'previewenvironments',
+    label: 'Preview Environments',
+    icon: 'i-heroicons-inbox',
+    to: '/previewenvironments',
+    badge: '',
+    tooltip: {
+      text: 'Inbox',
+      shortcuts: ['G', 'I']
+    }
+  },
+  //, {
+  //   id: 'users',
+  //   label: 'Users',
+  //   icon: 'i-heroicons-user-group',
+  //   to: '/users',
+  //   tooltip: {
+  //     text: 'Users',
+  //     shortcuts: ['G', 'U']
+  //   }
+  // },
+  {
+    id: 'settings',
+    label: 'Settings',
     to: '/settings',
-    exact: true
-  }, {
-    label: 'Members',
-    to: '/settings/members'
-  }, {
-    label: 'Notifications',
-    to: '/settings/notifications'
-  }],
-  tooltip: {
-    text: 'Settings',
-    shortcuts: ['G', 'S']
-  }
-}]
+    icon: 'i-heroicons-cog-8-tooth',
+    children: [{
+      label: 'General',
+      to: '/settings',
+      exact: true
+    },
+      // {
+      //   label: 'Members',
+      //   to: '/settings/members'
+      // },
+      //   {
+      //   label: 'Notifications',
+      //   to: '/settings/notifications'
+      // }
+    ],
+    tooltip: {
+      text: 'Settings',
+      shortcuts: ['G', 'S']
+    }
+  }]
 
 const footerLinks = [{
   label: 'Invite people',
@@ -86,15 +93,8 @@ const colors = computed(() => defaultColors.value.map(color => ({ ...color, acti
 
 <template>
   <UDashboardLayout>
-    <UDashboardPanel
-      :width="250"
-      :resizable="{ min: 200, max: 300 }"
-      collapsible
-    >
-      <UDashboardNavbar
-        class="!border-transparent"
-        :ui="{ left: 'flex-1' }"
-      >
+    <UDashboardPanel :width="250" :resizable="{ min: 200, max: 300 }" collapsible>
+      <UDashboardNavbar class="!border-transparent" :ui="{ left: 'flex-1' }">
         <template #left>
           <TeamsDropdown />
         </template>
@@ -109,10 +109,8 @@ const colors = computed(() => defaultColors.value.map(color => ({ ...color, acti
 
         <UDivider />
 
-        <UDashboardSidebarLinks
-          :links="[{ label: 'Colors', draggable: true, children: colors }]"
-          @update:links="colors => defaultColors = colors"
-        />
+        <UDashboardSidebarLinks :links="[{ label: 'Colors', draggable: true, children: colors }]"
+          @update:links="colors => defaultColors = colors" />
 
         <div class="flex-1" />
 

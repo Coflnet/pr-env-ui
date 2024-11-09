@@ -1,37 +1,37 @@
 <script setup lang="ts">
 import { format, isToday } from 'date-fns'
-import type { Mail } from '~/types'
+import type { PreviewEnvironment } from '~/types'
 
 const props = defineProps({
   modelValue: {
-    type: Object as PropType<Mail | null>,
+    type: Object as PropType<PreviewEnvironment | null>,
     default: null
   },
-  mails: {
-    type: Array as PropType<Mail[]>,
+  envs: {
+    type: Array<PreviewEnvironment>,
     default: () => []
   }
 })
 
 const emit = defineEmits(['update:modelValue'])
 
-const mailsRefs = ref<Element[]>([])
+const envsRefs = ref<Element[]>([])
 
-const selectedMail = computed({
+const selectedEnv = computed({
   get() {
     return props.modelValue
   },
-  set(value: Mail | null) {
+  set(value: PreviewEnvironment | null) {
     emit('update:modelValue', value)
   }
 })
 
-watch(selectedMail, () => {
-  if (!selectedMail.value) {
+watch(selectedEnv, () => {
+  if (!selectedEnv.value) {
     return
   }
 
-  const ref = mailsRefs.value[selectedMail.value.id]
+  const ref = envsRefs.value[selectedEnv.value.name]
   if (ref) {
     ref.scrollIntoView({ block: 'nearest' })
   }
@@ -39,21 +39,21 @@ watch(selectedMail, () => {
 
 defineShortcuts({
   arrowdown: () => {
-    const index = props.mails.findIndex(mail => mail.id === selectedMail.value?.id)
+    const index = props.envs.findIndex(envs => envs.name === selectedEnv.value?.name)
 
     if (index === -1) {
-      selectedMail.value = props.mails[0]
-    } else if (index < props.mails.length - 1) {
-      selectedMail.value = props.mails[index + 1]
+      selectedEnv.value = props.envs[0]
+    } else if (index < props.envs.length - 1) {
+      selectedEnv.value = props.envs[index + 1]
     }
   },
   arrowup: () => {
-    const index = props.mails.findIndex(mail => mail.id === selectedMail.value?.id)
+    const index = props.envs.findIndex(env => env.name === selectedEnv.value?.name)
 
     if (index === -1) {
-      selectedMail.value = props.mails[props.mails.length - 1]
+      selectedEnv.value = props.envs[props.envs.length - 1]
     } else if (index > 0) {
-      selectedMail.value = props.mails[index - 1]
+      selectedEnv.value = props.envs[index - 1]
     }
   }
 })
@@ -61,36 +61,23 @@ defineShortcuts({
 
 <template>
   <UDashboardPanelContent class="p-0">
-    <div
-      v-for="(mail, index) in mails"
-      :key="index"
-      :ref="el => { mailsRefs[mail.id] = el as Element }"
-    >
-      <div
-        class="p-4 text-sm cursor-pointer border-l-2"
-        :class="[
-          mail.unread ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300',
-          selectedMail && selectedMail.id === mail.id ? 'border-primary-500 dark:border-primary-400 bg-primary-100 dark:bg-primary-900/25' : 'border-white dark:border-gray-900 hover:border-primary-500/25 dark:hover:border-primary-400/25 hover:bg-primary-100/50 dark:hover:bg-primary-900/10'
-        ]"
-        @click="selectedMail = mail"
-      >
-        <div
-          class="flex items-center justify-between"
-          :class="[mail.unread && 'font-semibold']"
-        >
+    <div v-for="(env, index) in envs" :key="index">
+      <div class="p-4 text-sm cursor-pointer border-l-2"
+        :class="[env?.name ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300',
+        selectedEnv && selectedEnv.name === env?.name ? 'border-primary-500 dark:border-primary-400 bg-primary-100 dark:bg-primary-900/25' : 'border-white dark:border-gray-900 hover:border-primary-500/25 dark:hover:border-primary-400/25 hover:bg-primary-100/50 dark:hover:bg-primary-900/10']"
+        @click="selectedEnv = env">
+        <div class="flex items-center justify-between" :class="[env?.name && 'font-semibold']">
           <div class="flex items-center gap-3">
-            {{ mail.from.name }}
-
-            <UChip v-if="mail.unread" />
+            {{ env?.name }}
           </div>
 
-          <span>{{ isToday(new Date(mail.date)) ? format(new Date(mail.date), 'HH:mm') : format(new Date(mail.date), 'dd MMM') }}</span>
+          <span>{{ isToday(new Date()) ? format(new Date(), 'HH:mm') : format(new Date(), 'dd MMM') }}</span>
         </div>
-        <p :class="[mail.unread && 'font-semibold']">
-          {{ mail.subject }}
+        <p :class="[env?.name && 'font-semibold']">
+          {{ env?.name }}
         </p>
         <p class="text-gray-400 dark:text-gray-500 line-clamp-1">
-          {{ mail.body }}
+          {{ env?.name }}
         </p>
       </div>
 

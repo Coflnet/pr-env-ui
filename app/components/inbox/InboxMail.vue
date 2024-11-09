@@ -1,70 +1,108 @@
 <script setup lang="ts">
-import { format, isToday } from 'date-fns'
-import type { Mail } from '~/types'
+import type { FormError, FormSubmitEvent } from '#ui/types'
 
-defineProps({
-  mail: {
-    type: Object as PropType<Mail>,
-    required: true
+
+const props = defineProps({
+  formState: {
+    type: Object,
+    required: true,
+  },
+  createNewEnvironment: {
+    type: Boolean,
+    default: false,
   },
   selected: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
+
+const emits = defineEmits(["submit", "switchEditMode", "deleteEnvironment"]);
+
+function validate(state: any): FormError[] {
+  const errors = []
+  if (!state.name) errors.push({ path: 'name', message: 'Please enter a name.' })
+  if (!state.gitRepository) errors.push({ path: 'gitRepository', message: 'Please enter a repository name' })
+  if (!state.gitOrganization) errors.push({ path: 'gitOrganization', message: 'Please enter a organization/username' })
+  return errors
+}
+
+const mode = ref(props.createNewEnvironment ? 'create' : 'view');
+
+const title = computed(() => {
+  if (mode.value === 'view') {
+    return 'View Environment'
+  } else if (mode.value === 'edit') {
+    return 'Edit Environment'
+  } else if (mode.value === 'create') {
+    return 'Create Environment'
+  }
+});
+
+const readModeActive = computed(() => {
+  return props.formState.editMode === false;
+});
+
+const switchMode = () => {
+  emits('switchEditMode');
+}
+
+const switchModeLabel = computed(() => {
+  if (props.formState.editMode)
+    return 'Read-only'
+  return 'Edit'
+});
+
+const saveButtonLabel = computed(() => {
+  if (props.createNewEnvironment)
+    return "Create";
+  return "Edit";
+})
+
+function onSubmit(event: FormSubmitEvent<any>) {
+  emits('submit', event.data);
+}
+
+function deleteEnv() {
+  emits('deleteEnvironment')
+}
+
 </script>
 
 <template>
-  <UDashboardPanelContent>
-    <div class="flex justify-between">
-      <div class="flex items-center gap-4">
-        <UAvatar
-          v-bind="mail.from.avatar"
-          :alt="mail.from.name"
-          size="lg"
-        />
 
-        <div class="min-w-0">
-          <p class="text-gray-900 dark:text-white font-semibold">
-            {{ mail.from.name }}
-          </p>
-          <p class="text-gray-500 dark:text-gray-400 font-medium">
-            {{ mail.subject }}
-          </p>
-        </div>
-      </div>
+  <UDashboardPanelContent class="pb-24">
+    <UForm :state="props.formState" :validate="validate" :validate-on="['submit']" @submit="onSubmit">
+      <UDashboardSection :title>
+        <template #links>
+          <UButton :label="switchModeLabel" color="black" @click="switchMode" v-if="!props.createNewEnvironment" />
+        </template>
 
-      <p class="font-medium text-gray-900 dark:text-white">
-        {{ isToday(new Date(mail.date)) ? format(new Date(mail.date), 'HH:mm') : format(new Date(mail.date), 'dd MMM') }}
-      </p>
-    </div>
+        <UFormGroup name="name" label="Name" description="The display name of the Preview Environment" required
+          class="grid grid-cols-2 gap-2 items-center" :ui="{ container: '' }">
+          <UInput v-model="props.formState.name" autocomplete="off" size="md" :disabled="readModeActive" />
+        </UFormGroup>
 
-    <UDivider class="my-5" />
+        <UFormGroup name="email" label="Github Owner" description="The organization name or the username" required
+          class="grid grid-cols-2 gap-2" :ui="{ container: '' }">
+          <UInput v-model="props.formState.gitOrganization" autocomplete="off" size="md" :disabled="readModeActive" />
+        </UFormGroup>
 
-    <div class="flex-1">
-      <p class="text-lg">
-        {{ mail.body }}
-      </p>
-    </div>
+        <UFormGroup name="email" label="Github Owner" description="Use the format <owner>/<repository>" required
+          class="grid grid-cols-2 gap-2" :ui="{ container: '' }">
+          <UInput v-model="props.formState.gitRepository" autocomplete="off" size="md" :disabled="readModeActive" />
+        </UFormGroup>
+      </UDashboardSection>
 
-    <UDivider class="my-5" />
+      <UDivider />
 
-    <form @submit.prevent>
-      <UTextarea
-        color="gray"
-        required
-        size="xl"
-        :rows="5"
-        :placeholder="`Reply to ${mail.from.name}`"
-      >
-        <UButton
-          type="submit"
-          color="black"
-          label="Send"
-          icon="i-heroicons-paper-airplane"
-          class="absolute bottom-2.5 right-3.5"
-        />
-      </UTextarea>
-    </form>
+      <UDashboardSection>
+        <template #links>
+          <UButton label="Delete" color="red" v-if="!props.createNewEnvironment" @click="deleteEnv" />
+          <UButton :label="saveButtonLabel" type="submit" :disabled="readModeActive" />
+        </template>
+      </UDashboardSection>
+
+    </UForm>
   </UDashboardPanelContent>
 </template>

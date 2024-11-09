@@ -43,9 +43,9 @@ const { data } = await useAsyncData<DataRecord[]>(async () => {
 const x = (_: DataRecord, i: number) => i
 const y = (d: DataRecord) => d.amount
 
-const total = computed(() => data.value.reduce((acc: number, { amount }) => acc + amount, 0))
+const total = computed(() => 0)
 
-const formatNumber = new Intl.NumberFormat('en', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format
+const formatNumber = new Intl.NumberFormat('en', { maximumFractionDigits: 0 }).format
 
 const formatDate = (date: Date): string => {
   return ({
@@ -67,49 +67,25 @@ const template = (d: DataRecord) => `${formatDate(d.date)}: ${formatNumber(d.amo
 </script>
 
 <template>
-  <UDashboardCard
-    ref="cardRef"
-    :ui="{ body: { padding: '!pb-3 !px-0' } as any }"
-  >
+  <UDashboardCard ref="cardRef" :ui="{ body: { padding: '!pb-3 !px-0' } as any }">
     <template #header>
       <div>
         <p class="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">
-          Revenue
+          Preview Environments
         </p>
         <p class="text-3xl text-gray-900 dark:text-white font-semibold">
-          {{ formatNumber(total) }}
+          {{ formatNumber(total) }} (not working yet)
         </p>
       </div>
     </template>
 
-    <VisXYContainer
-      :data="data"
-      :padding="{ top: 10 }"
-      class="h-96"
-      :width="width"
-    >
-      <VisLine
-        :x="x"
-        :y="y"
-        color="rgb(var(--color-primary-DEFAULT))"
-      />
-      <VisArea
-        :x="x"
-        :y="y"
-        color="rgb(var(--color-primary-DEFAULT))"
-        :opacity="0.1"
-      />
+    <VisXYContainer :data="data" :padding="{ top: 10 }" class="h-96" :width="width">
+      <VisLine :x="x" :y="y" color="rgb(var(--color-primary-DEFAULT))" />
+      <VisArea :x="x" :y="y" color="rgb(var(--color-primary-DEFAULT))" :opacity="0.1" />
 
-      <VisAxis
-        type="x"
-        :x="x"
-        :tick-format="xTicks"
-      />
+      <VisAxis type="x" :x="x" :tick-format="xTicks" />
 
-      <VisCrosshair
-        color="rgb(var(--color-primary-DEFAULT))"
-        :template="template"
-      />
+      <VisCrosshair color="rgb(var(--color-primary-DEFAULT))" :template="template" />
 
       <VisTooltip />
     </VisXYContainer>
