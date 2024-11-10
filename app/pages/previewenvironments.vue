@@ -1,7 +1,16 @@
 <script setup lang='ts'>
 import type { PreviewEnvironment } from '~/types'
+import { usePreviewEnvironmentStore } from '../stores/previewenvironment'
 
-const { data: environments, refresh: refreshEnvironments } = await usePreviewenvironments('/environment/list');
+const { user } = useOidcAuth();
+
+console.log({ user })
+
+const { envs, refreshEnvs, createEnv } = usePreviewEnvironmentStore()
+await refreshEnvs()
+console.log(envs)
+
+
 const toast = useToast()
 
 const tabItems = [{
@@ -26,7 +35,7 @@ const dropdownItems = [[{
 }]]
 
 const filteredEnvironments = computed(() => {
-  return environments;
+  return envs;
 })
 
 const selectedEnvironment = ref<PreviewEnvironment | null>()
@@ -85,30 +94,26 @@ async function saveEnvironment(_: any) {
   }
 
   try {
-    await usePreviewenvironments('/environment', {
-      method: 'POST',
-      body: {
-        name: formState.name,
-        gitSettings: {
-          organization: formState.gitOrganization,
-          repository: formState.gitRepository
-        },
-        containerSettings: {
-          image: 'muehlhansfl',
-          registry: 'index.docker.io'
-        },
-        applicationSettings: {
-          port: 80,
-          hostname: 'preview.flou.dev'
-        }
-      }
+    await createEnv({
+      name: formState.name,
+      gitSettings: {
+        organization: formState.gitOrganization,
+        repository: formState.gitRepository,
+      },
+      containerSettings: {
+        image: 'muehlhansfl',
+        registry: 'index.docker.io',
+      },
+      applicationSettings: {
+        hostname: 'preview.flou.dev',
+        port: 80,
+      },
     })
     toast.add({ title: 'Environment updated', icon: 'i-heroicons-check-circle', color: 'green' })
   } catch (e) {
     toast.add({ title: 'Failed to update environment', icon: 'i-heroicons-x-mark', color: 'red' })
+    console.error(e);
   }
-
-  await refreshEnvironments();
 }
 
 async function deleteEnvironment() {
@@ -128,8 +133,6 @@ async function deleteEnvironment() {
   } catch (e) {
     toast.add({ title: 'Failed to delete environment', icon: 'i-heroicons-x-mark', color: 'red' })
   }
-
-  await refreshEnvironments();
 }
 
 </script>
@@ -137,7 +140,7 @@ async function deleteEnvironment() {
 <template>
   <UDashboardPage>
     <UDashboardPanel id="inbox" :width="800" :resizable="{ min: 300, max: 800 }">
-      <UDashboardNavbar title="Environments" :badge="environments?.length ?? 0">
+      <UDashboardNavbar title="Environments" :badge="envs?.length ?? 0">
         <template #right>
           <UTabs v-model="selectedTab" :items="tabItems"
             :ui="{ wrapper: '', list: { height: 'h-9', tab: { height: 'h-7', size: 'text-[13px]' } } }" />
@@ -148,7 +151,7 @@ async function deleteEnvironment() {
       </UDashboardNavbar>
 
       <!-- ~/components/inbox/InboxList.vue -->
-      <InboxList v-model="selectedEnvironment" :envs="filteredEnvironments.value as any" />
+      <InboxList v-model="selectedEnvironment" :envs="filteredEnvironments" />
     </UDashboardPanel>
 
     <UDashboardPanel v-model="isMailPanelOpen" collapsible grow side="right">

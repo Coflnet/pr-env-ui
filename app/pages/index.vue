@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { sub } from 'date-fns'
-import type { Period, Range } from '~/types'
 
 const { isNotificationsSlideoverOpen } = useDashboard()
 
@@ -14,8 +13,8 @@ const items = [[{
   to: '/users'
 }]]
 
-const range = ref<Range>({ start: sub(new Date(), { days: 14 }), end: new Date() })
-const period = ref<Period>('daily')
+const range = ref({ start: sub(new Date(), { days: 14 }), end: new Date() })
+const period = ref('daily')
 </script>
 
 <template>

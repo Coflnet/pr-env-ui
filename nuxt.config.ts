@@ -10,6 +10,8 @@ export default defineNuxtConfig({
     "@nuxt/ui",
     "@vueuse/nuxt",
     "nuxt-open-fetch",
+    "@pinia/nuxt",
+    "nuxt-oidc-auth",
   ],
 
   ui: {
@@ -20,9 +22,35 @@ export default defineNuxtConfig({
     disableTransition: true,
   },
 
+  ssr: true,
+
+  oidc: {
+    defaultProvider: "keycloak",
+    providers: {
+      keycloak: {
+        clientId: "frontend",
+        clientSecret: "muUK01XfC1EGDKR8KbDDu98i3T6iFLoy",
+        baseUrl: "https://auth.coflnet.com/realms/pr-env",
+        redirectUri: "http://localhost:3000/auth/keycloak/callback",
+        logoutRedirectUri: "https://preview.flou.dev",
+        exposeAccessToken: true,
+      },
+    },
+    middleware: {
+      globalMiddlewareEnabled: true,
+      customLoginPage: false,
+    },
+  },
+
+  pinia: {
+    storesDirs: ["./stores/**", "./app/stores/**"],
+  },
+
   routeRules: {
     // Temporary workaround for prerender regression. see https://github.com/nuxt/nuxt/issues/27490
-    "/": { prerender: true },
+    "/": {
+      prerender: false,
+    },
   },
 
   devtools: {
