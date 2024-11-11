@@ -15,6 +15,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  editModeActive: {
+    type: Boolean,
+    default: false
+  }
 })
 
 const emits = defineEmits(["submit", "switchEditMode", "deleteEnvironment"]);
@@ -27,20 +31,19 @@ function validate(state: any): FormError[] {
   return errors
 }
 
-const mode = ref(props.createNewEnvironment ? 'create' : 'view');
-
 const title = computed(() => {
-  if (mode.value === 'view') {
-    return 'View Environment'
-  } else if (mode.value === 'edit') {
-    return 'Edit Environment'
-  } else if (mode.value === 'create') {
+  if (props.createNewEnvironment) {
     return 'Create Environment'
   }
+
+  return "View Environment";
+
 });
 
 const readModeActive = computed(() => {
-  return props.formState.editMode === false;
+  if (props.createNewEnvironment)
+    return false;
+  return !props.formState.editMode;
 });
 
 const switchMode = () => {
@@ -55,8 +58,12 @@ const switchModeLabel = computed(() => {
 
 const saveButtonLabel = computed(() => {
   if (props.createNewEnvironment)
-    return "Create";
-  return "Edit";
+    return "Create Environment";
+
+  if (props.editModeActive)
+    return "Edit Environment";
+
+  return "View Environment";
 })
 
 function onSubmit(event: FormSubmitEvent<any>) {
@@ -74,9 +81,6 @@ function deleteEnv() {
   <UDashboardPanelContent class="pb-24">
     <UForm :state="props.formState" :validate="validate" :validate-on="['submit']" @submit="onSubmit">
       <UDashboardSection :title>
-        <template #links>
-          <UButton :label="switchModeLabel" color="black" @click="switchMode" v-if="!props.createNewEnvironment" />
-        </template>
 
         <UFormGroup name="name" label="Name" description="The display name of the Preview Environment" required
           class="grid grid-cols-2 gap-2 items-center" :ui="{ container: '' }">

@@ -1,14 +1,15 @@
 <script setup lang='ts'>
 import type { PreviewEnvironment } from '~/types'
 import { usePreviewEnvironmentStore } from '../stores/previewenvironment'
+import { storeToRefs } from 'pinia'
 
 const { user } = useOidcAuth();
 
-console.log({ user })
+const previewEnvironmentStore = usePreviewEnvironmentStore()
+const { refreshEnvs, createEnv } = previewEnvironmentStore
+const { envs } = storeToRefs(previewEnvironmentStore);
 
-const { envs, refreshEnvs, createEnv } = usePreviewEnvironmentStore()
 await refreshEnvs()
-console.log(envs)
 
 
 const toast = useToast()
@@ -20,22 +21,10 @@ const tabItems = [{
 }]
 const selectedTab = ref(0)
 
-const dropdownItems = [[{
-  label: 'Mark as unread',
-  icon: 'i-heroicons-check-circle'
-}, {
-  label: 'Mark as important',
-  icon: 'i-heroicons-exclamation-circle'
-}], [{
-  label: 'Star thread',
-  icon: 'i-heroicons-star'
-}, {
-  label: 'Mute thread',
-  icon: 'i-heroicons-pause-circle'
-}]]
+const dropdownItems = [[]]
 
 const filteredEnvironments = computed(() => {
-  return envs;
+  return envs.value;
 })
 
 const selectedEnvironment = ref<PreviewEnvironment | null>()
@@ -53,17 +42,17 @@ const isMailPanelOpen = computed({
 })
 
 watch(selectedEnvironment, (selectedEnv) => {
+  selectedEnvironmentTab.value = 0;
+
   if (selectedEnv) {
     createNewEnvironment.value = false;
     formState.name = selectedEnv.name;
     formState.gitOrganization = selectedEnv.gitSettings.organization;
     formState.gitRepository = selectedEnv.gitSettings.repository;
-    formState.editMode = false;
   } else {
     formState.name = '';
     formState.gitOrganization = '';
     formState.gitRepository = '';
-    formState.editMode = true;
   }
 });
 
@@ -76,14 +65,14 @@ const formState = reactive({
   name: 'Test Repo',
   gitOrganization: 'Flou21',
   gitRepository: 'test-page',
-  editMode: false,
 });
+
+const editMode = ref(false);
 
 
 
 function switchEditMode() {
-  formState.editMode = !formState.editMode;
-  console.log(`switching to ${formState.editMode}`);
+  editMode.value = !editMode.value;
 }
 
 async function saveEnvironment(_: any) {
@@ -95,7 +84,11 @@ async function saveEnvironment(_: any) {
 
   try {
     await createEnv({
-      name: formState.name,
+      id: '',
+      name: '',
+      owner: '',
+
+      displayName: formState.name,
       gitSettings: {
         organization: formState.gitOrganization,
         repository: formState.gitRepository,
@@ -109,6 +102,7 @@ async function saveEnvironment(_: any) {
         port: 80,
       },
     })
+
     toast.add({ title: 'Environment updated', icon: 'i-heroicons-check-circle', color: 'green' })
   } catch (e) {
     toast.add({ title: 'Failed to update environment', icon: 'i-heroicons-x-mark', color: 'red' })
@@ -122,10 +116,13 @@ async function deleteEnvironment() {
   }
 
   try {
-    await usePreviewenvironments('/environment/{name}', {
+    await usePreviewenvironments('/environment/{id}', {
       method: 'DELETE',
       path: {
-        name: selectedEnvironment.value.name,
+        id: selectedEnvironment.value.id,
+      },
+      header: {
+        authentication: user.value.accessToken,
       }
     })
 
@@ -133,6 +130,26 @@ async function deleteEnvironment() {
   } catch (e) {
     toast.add({ title: 'Failed to delete environment', icon: 'i-heroicons-x-mark', color: 'red' })
   }
+}
+
+const switchModeLabel = computed(() => {
+  if (editMode.value)
+    return 'Read-only'
+  return 'Edit'
+});
+
+
+// envionment tabs
+const environmentTabs = [{
+  label: 'General',
+}, {
+  label: 'Instances',
+}]
+
+const selectedEnvironmentTab = ref(0)
+
+function onEnvironmentTabChange(index: number) {
+  selectedEnvironmentTab.value = index;
 }
 
 </script>
@@ -164,50 +181,24 @@ async function deleteEnvironment() {
           </template>
 
           <template #left>
-            <UTooltip text="Archive">
-              <UButton icon="i-heroicons-archive-box" color="gray" variant="ghost" />
-            </UTooltip>
-
-            <UTooltip text="Move to junk">
-              <UButton icon="i-heroicons-archive-box-x-mark" color="gray" variant="ghost" />
-            </UTooltip>
-
+            <UTabs :items="environmentTabs" @change="onEnvironmentTabChange" v-model="selectedEnvironmentTab" />
             <UDivider orientation="vertical" class="mx-1.5" />
-
-            <UPopover :popper="{ placement: 'bottom-start' }">
-              <template #default="{ open }">
-                <UTooltip text="Snooze" :prevent="open">
-                  <UButton icon="i-heroicons-clock" color="gray" variant="ghost"
-                    :class="[open && 'bg-gray-50 dark:bg-gray-800']" />
-                </UTooltip>
-              </template>
-
-              <template #panel="{ close }">
-                <DatePicker @close="close" />
-              </template>
-            </UPopover>
           </template>
 
           <template #right>
-            <UTooltip text="Reply">
-              <UButton icon="i-heroicons-arrow-uturn-left" color="gray" variant="ghost" />
-            </UTooltip>
-
-            <UTooltip text="Forward">
-              <UButton icon="i-heroicons-arrow-uturn-right" color="gray" variant="ghost" />
-            </UTooltip>
-
+            <UButton :label="switchModeLabel" color="black" @click="switchEditMode" v-if="!createNewEnvironment" />
             <UDivider orientation="vertical" class="mx-1.5" />
-
             <UDropdown :items="dropdownItems">
               <UButton icon="i-heroicons-ellipsis-vertical" color="gray" variant="ghost" />
             </UDropdown>
           </template>
         </UDashboardNavbar>
 
-        <!-- ~/components/inbox/InboxMail.vue -->
         <InboxMail :formState="formState" :createNewEnvironment @submit="saveEnvironment"
-          @switchEditMode='switchEditMode' @deleteEnvironment="deleteEnvironment" />
+          v-if="selectedEnvironmentTab == 0" @deleteEnvironment="deleteEnvironment" :editModeActive="editMode" />
+
+        <PreviewenvironmentInstanceList v-if="selectedEnvironmentTab == 1" :env="selectedEnvironment" />
+
       </template>
       <div v-else class="flex-1 hidden lg:flex items-center justify-center">
         <UIcon name="i-heroicons-inbox" class="w-32 h-32 text-gray-400 dark:text-gray-500" />

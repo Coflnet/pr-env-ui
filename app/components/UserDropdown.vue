@@ -5,9 +5,6 @@ const { isDashboardSearchModalOpen } = useUIState()
 const { metaSymbol } = useShortcuts()
 
 const { loggedIn, user, login, logout } = useOidcAuth()
-console.log(user)
-console.log({ loggedIn })
-console.log(user.value.userInfo.email)
 
 const items = computed(() => [
   [{

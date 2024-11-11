@@ -11,7 +11,7 @@ export default defineNuxtConfig({
     "@vueuse/nuxt",
     "nuxt-open-fetch",
     "@pinia/nuxt",
-    "nuxt-oidc-auth",
+    "nuxt-oidc-auth-flou",
   ],
 
   ui: {
