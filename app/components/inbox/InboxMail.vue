@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { FormError, FormSubmitEvent } from '#ui/types'
-
+import { useGithubStore } from '../../stores/github.ts'
 
 const props = defineProps({
   formState: {
@@ -21,13 +21,21 @@ const props = defineProps({
   }
 })
 
+const githubStore = useGithubStore()
+const { repositories } = storeToRefs(githubStore)
+
+console.log(repositories)
+const repositoryDropDownList = computed(() => {
+  return repositories.value.map((repo: any) => {
+    return `${repo.owner}/${repo.name}`;
+  });
+})
+
 const emits = defineEmits(["submit", "switchEditMode", "deleteEnvironment"]);
 
 function validate(state: any): FormError[] {
   const errors = []
   if (!state.name) errors.push({ path: 'name', message: 'Please enter a name.' })
-  if (!state.gitRepository) errors.push({ path: 'gitRepository', message: 'Please enter a repository name' })
-  if (!state.gitOrganization) errors.push({ path: 'gitOrganization', message: 'Please enter a organization/username' })
   return errors
 }
 
@@ -44,16 +52,6 @@ const readModeActive = computed(() => {
   if (props.createNewEnvironment)
     return false;
   return !props.formState.editMode;
-});
-
-const switchMode = () => {
-  emits('switchEditMode');
-}
-
-const switchModeLabel = computed(() => {
-  if (props.formState.editMode)
-    return 'Read-only'
-  return 'Edit'
 });
 
 const saveButtonLabel = computed(() => {
@@ -87,15 +85,24 @@ function deleteEnv() {
           <UInput v-model="props.formState.name" autocomplete="off" size="md" :disabled="readModeActive" />
         </UFormGroup>
 
-        <UFormGroup name="email" label="Github Owner" description="The organization name or the username" required
-          class="grid grid-cols-2 gap-2" :ui="{ container: '' }">
-          <UInput v-model="props.formState.gitOrganization" autocomplete="off" size="md" :disabled="readModeActive" />
+        <UFormGroup name="Github Repositories" description="Select the repository you want to use" v-if="repositories"
+          class="grid grid-cols-2 gap-2" label="Github Repository" :ui="{ container: '' }">
+          <USelect :options="repositoryDropDownList" :disabled="readModeActive" size="md" autocomplete="off"
+            v-model="props.formState.gitRepositoryCombined" />
         </UFormGroup>
 
-        <UFormGroup name="email" label="Github Owner" description="Use the format <owner>/<repository>" required
-          class="grid grid-cols-2 gap-2" :ui="{ container: '' }">
-          <UInput v-model="props.formState.gitRepository" autocomplete="off" size="md" :disabled="readModeActive" />
-        </UFormGroup>
+        <div v-else>
+          <UFormGroup name="email" label="Github Owner" description="The organization name or the username"
+            class="grid grid-cols-2 gap-2" :ui="{ container: '' }">
+            <UInput v-model="props.formState.gitOrganization" autocomplete="off" size="md" :disabled="readModeActive" />
+          </UFormGroup>
+
+          <UFormGroup name="email" label="Github Owner" description="Use the format <owner>/<repository>"
+            class="grid grid-cols-2 gap-2" :ui="{ container: '' }">
+            <UInput v-model="props.formState.gitRepository" autocomplete="off" size="md" :disabled="readModeActive" />
+          </UFormGroup>
+        </div>
+
       </UDashboardSection>
 
       <UDivider />

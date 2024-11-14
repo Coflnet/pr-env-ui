@@ -1,16 +1,13 @@
 import { defineStore } from "pinia";
-import type { PreviewEnvironment } from "../types/index.d.ts";
+import type { components as Components } from "#open-fetch-schemas/previewenvironments";
 
 export const usePreviewEnvironmentStore = defineStore(
   "previewEnvironment",
   () => {
-    const envs = ref<PreviewEnvironment[]>([]);
+    const envs = ref<Components["schemas"]["server.environmentModel"][]>([]);
 
     async function refreshEnvs() {
       const { user } = useOidcAuth();
-      console.log(`refresh with token ${user.value.accessToken}`);
-      console.log(`refresh for user:`);
-      console.log({ user });
 
       const { data } = await usePreviewenvironments(
         "/environment/list",
@@ -21,10 +18,12 @@ export const usePreviewEnvironmentStore = defineStore(
         },
       );
 
-      envs.value = data.value as PreviewEnvironment[];
+      envs.value = data.value;
     }
 
-    async function createEnv(env: PreviewEnvironment) {
+    async function createEnv(
+      env: Components["schemas"]["server.environmentModel"],
+    ) {
       const { user } = useOidcAuth();
       await usePreviewenvironments("/environment", {
         method: "POST",

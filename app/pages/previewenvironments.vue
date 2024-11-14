@@ -49,10 +49,12 @@ watch(selectedEnvironment, (selectedEnv) => {
     formState.name = selectedEnv.name;
     formState.gitOrganization = selectedEnv.gitSettings.organization;
     formState.gitRepository = selectedEnv.gitSettings.repository;
+    formState.gitRepositoryCombined = `${selectedEnv.gitSettings.organization}/${selectedEnv.gitSettings.repository}`;
   } else {
     formState.name = '';
     formState.gitOrganization = '';
     formState.gitRepository = '';
+    formState.gitRepositoryCombined = '';
   }
 });
 
@@ -65,11 +67,15 @@ const formState = reactive({
   name: 'Test Repo',
   gitOrganization: 'Flou21',
   gitRepository: 'test-page',
+  gitRepositoryCombined: "Flou21/test-page",
 });
 
 const editMode = ref(false);
 
-
+const githubStore = useGithubStore()
+const { repositories } = storeToRefs(githubStore)
+const { loadRepositoriesOfUser } = githubStore
+await loadRepositoriesOfUser()
 
 function switchEditMode() {
   editMode.value = !editMode.value;
@@ -82,16 +88,29 @@ async function saveEnvironment(_: any) {
     return;
   }
 
+  let repo = '';
+  let org = '';
+  if (formState.gitRepositoryCombined) {
+    repo = formState.gitRepositoryCombined.split('/')[1];
+    org = formState.gitRepositoryCombined.split('/')[0];
+  } else if (formState.gitRepository && formState.gitOrganization) {
+    repo = formState.gitRepository;
+    org = formState.gitOrganization;
+  } else {
+    toast.add({ title: 'Please enter a repository and organization', icon: 'i-heroicons-x-mark', color: 'red' })
+    return;
+  }
+
+  toast.add({ title: 'Saving environment..', icon: 'i-heroicons-refresh', color: 'blue' })
+
   try {
     await createEnv({
       id: '',
-      name: '',
-      owner: '',
-
+      name: formState.name,
       displayName: formState.name,
       gitSettings: {
-        organization: formState.gitOrganization,
-        repository: formState.gitRepository,
+        organization: org,
+        repository: repo,
       },
       containerSettings: {
         image: 'muehlhansfl',
