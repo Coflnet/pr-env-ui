@@ -60,8 +60,8 @@ export default defineNuxtConfig({
   openFetch: {
     clients: {
       Previewenvironments: {
-        schema: "http://localhost:8080/api/openapi/openapi.yaml",
-        baseURL: "http://localhost:8080/api/v1",
+        schema: "https://dash.tmpenv.app/api/openapi/openapi.yaml",
+        baseURL: "http://dash.tmpenv.app/api/v1",
       },
     },
   },
