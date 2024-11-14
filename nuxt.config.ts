@@ -61,7 +61,7 @@ export default defineNuxtConfig({
     clients: {
       Previewenvironments: {
         schema: "https://dash.tmpenv.app/api/openapi/openapi.yaml",
-        baseURL: "http://dash.tmpenv.app/api/v1",
+        baseURL: "https://dash.tmpenv.app/api/v1",
       },
     },
   },
