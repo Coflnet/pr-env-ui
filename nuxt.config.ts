@@ -30,7 +30,7 @@ export default defineNuxtConfig({
       keycloak: {
         clientId: process.env.NUXT_OIDC_PROVIDERS_KEYCLOAK_CLIENT_ID,
         clientSecret: process.env.NUXT_OIDC_PROVIDERS_KEYCLOAK_CLIENT_SECRET,
-        baseUrl: process.env.NUXT_OIDC_PROVIDERS_KEYCLOAK_BASE_URL,
+        baseUrl: "https://auth.coflnet.com/realms/pr-env",
         logoutRedirectUri: process.env.OIDC_PROVIDERS_KEYCLOAK_LOGOUT_URI,
         exposeAccessToken: true,
         redirectUri: process.env.OIDC_PROVIDERS_KEYCLOAK_REDIRECT_URI,
