@@ -28,12 +28,10 @@ export default defineNuxtConfig({
     defaultProvider: "keycloak",
     providers: {
       keycloak: {
-        clientId: process.env.NUXT_OIDC_PROVIDERS_KEYCLOAK_CLIENT_ID,
-        clientSecret: process.env.NUXT_OIDC_PROVIDERS_KEYCLOAK_CLIENT_SECRET,
         baseUrl: "https://auth.coflnet.com/realms/pr-env",
-        logoutRedirectUri: process.env.OIDC_PROVIDERS_KEYCLOAK_LOGOUT_URI,
+        logoutRedirectUri: "https://tmpenv.app",
         exposeAccessToken: true,
-        redirectUri: process.env.OIDC_PROVIDERS_KEYCLOAK_REDIRECT_URI,
+        redirectUri: "https://dash.tmpenv.app/auth/keycloak/callback",
       },
     },
     middleware: {
