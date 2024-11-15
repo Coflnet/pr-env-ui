@@ -117,7 +117,7 @@ async function saveEnvironment(_: any) {
         registry: 'index.docker.io',
       },
       applicationSettings: {
-        hostname: 'preview.flou.dev',
+        hostname: 'tmpenv.app',
         port: 80,
       },
     })
