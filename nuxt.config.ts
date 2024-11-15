@@ -28,6 +28,8 @@ export default defineNuxtConfig({
     defaultProvider: "keycloak",
     providers: {
       keycloak: {
+        clientId: "frontend",
+        clientSecret: "A4ALzb6rlwhHaHj8AzXPfq6SaptLABH5",
         baseUrl: "https://auth.coflnet.com/realms/pr-env",
         logoutRedirectUri: "https://tmpenv.app",
         exposeAccessToken: true,
