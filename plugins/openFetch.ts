@@ -7,11 +7,19 @@ export default defineNuxtPlugin({
     return {
       provide: Object.entries(clients).reduce((acc, [name, options]) => ({
         ...acc,
-        [name]: createOpenFetch(options, localFetch),
-        onRequest(ctx) {
-          console.log(`custom log: ${ctx.request}`);
-        },
-      })),
+        [name]: createOpenFetch((localOptions) => ({
+          ...options,
+          ...localOptions,
+          onRequest(ctx) {
+            ctx.options.headers = {
+              ...ctx.options.headers || {},
+              Authorization: `Bearer what`, // Wherever your token comes from
+            };
+            return localOptions?.onRequest?.(ctx);
+          },
+        }), localFetch),
+      }), {}),
     };
   },
 });
+

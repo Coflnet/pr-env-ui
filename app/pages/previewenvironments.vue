@@ -1,12 +1,10 @@
 <script setup lang='ts'>
-import type { PreviewEnvironment } from '~/types'
 import { usePreviewEnvironmentStore } from '../stores/previewenvironment'
+import type { previewEnvironmentModel } from '#openapi-types'
 import { storeToRefs } from 'pinia'
 
-const { user } = useOidcAuth();
-
 const previewEnvironmentStore = usePreviewEnvironmentStore()
-const { refreshEnvs, createEnv } = previewEnvironmentStore
+const { refreshEnvs, createEnv, deleteEnv } = previewEnvironmentStore
 const { envs } = storeToRefs(previewEnvironmentStore);
 
 await refreshEnvs()
@@ -27,7 +25,7 @@ const filteredEnvironments = computed(() => {
   return envs.value;
 })
 
-const selectedEnvironment = ref<PreviewEnvironment | null>()
+const selectedEnvironment = ref<previewEnvironmentModel | null>()
 const createNewEnvironment = ref(false);
 
 const isMailPanelOpen = computed({
@@ -46,36 +44,45 @@ watch(selectedEnvironment, (selectedEnv) => {
 
   if (selectedEnv) {
     createNewEnvironment.value = false;
-    formState.name = selectedEnv.name;
-    formState.gitOrganization = selectedEnv.gitSettings.organization;
-    formState.gitRepository = selectedEnv.gitSettings.repository;
-    formState.gitRepositoryCombined = `${selectedEnv.gitSettings.organization}/${selectedEnv.gitSettings.repository}`;
+    formState.value = selectedEnv;
   } else {
-    formState.name = '';
-    formState.gitOrganization = '';
-    formState.gitRepository = '';
-    formState.gitRepositoryCombined = '';
+    resetFormState();
   }
 });
+
+function resetFormState() {
+  formState.value = {
+    id: '',
+    name: '',
+    gitSettings: {
+      repository: '',
+      organization: ''
+    },
+    applicationSettings: {
+      port: 80,
+      environmentVariables: [],
+      command: ''
+    },
+    containerSettings: {
+    },
+    buildSettings: {
+      buildAllPullRequests: true,
+      buildAllBranches: false,
+    }
+  }
+}
 
 function prepareCreateNewEnv() {
   selectedEnvironment.value = null;
   createNewEnvironment.value = true;
+  console.log("create new env");
+  console.log(selectedEnvironmentTab)
 }
 
-const formState = reactive({
-  name: 'Test Repo',
-  gitOrganization: 'Flou21',
-  gitRepository: 'test-page',
-  gitRepositoryCombined: "Flou21/test-page",
-});
+const formState = ref<previewEnvironmentModel>();
+resetFormState();
 
 const editMode = ref(false);
-
-const githubStore = useGithubStore()
-const { repositories } = storeToRefs(githubStore)
-const { loadRepositoriesOfUser } = githubStore
-await loadRepositoriesOfUser()
 
 function switchEditMode() {
   editMode.value = !editMode.value;
@@ -88,39 +95,10 @@ async function saveEnvironment(_: any) {
     return;
   }
 
-  let repo = '';
-  let org = '';
-  if (formState.gitRepositoryCombined) {
-    repo = formState.gitRepositoryCombined.split('/')[1];
-    org = formState.gitRepositoryCombined.split('/')[0];
-  } else if (formState.gitRepository && formState.gitOrganization) {
-    repo = formState.gitRepository;
-    org = formState.gitOrganization;
-  } else {
-    toast.add({ title: 'Please enter a repository and organization', icon: 'i-heroicons-x-mark', color: 'red' })
-    return;
-  }
-
   toast.add({ title: 'Saving environment..', icon: 'i-heroicons-refresh', color: 'blue' })
 
   try {
-    await createEnv({
-      id: '',
-      name: formState.name,
-      displayName: formState.name,
-      gitSettings: {
-        organization: org,
-        repository: repo,
-      },
-      containerSettings: {
-        image: 'muehlhansfl',
-        registry: 'index.docker.io',
-      },
-      applicationSettings: {
-        hostname: 'tmpenv.app',
-        port: 80,
-      },
-    })
+    await createEnv(formState.value)
 
     toast.add({ title: 'Environment updated', icon: 'i-heroicons-check-circle', color: 'green' })
   } catch (e) {
@@ -135,19 +113,11 @@ async function deleteEnvironment() {
   }
 
   try {
-    await usePreviewenvironments('/environment/{id}', {
-      method: 'DELETE',
-      path: {
-        id: selectedEnvironment.value.id,
-      },
-      header: {
-        authentication: user.value.accessToken,
-      }
-    })
-
+    await deleteEnv(selectedEnvironment.value)
     toast.add({ title: 'Environment deleted', icon: 'i-heroicons-check-circle', color: 'green' })
   } catch (e) {
     toast.add({ title: 'Failed to delete environment', icon: 'i-heroicons-x-mark', color: 'red' })
+    console.log({ e })
   }
 }
 
@@ -186,8 +156,7 @@ function onEnvironmentTabChange(index: number) {
         </template>
       </UDashboardNavbar>
 
-      <!-- ~/components/inbox/InboxList.vue -->
-      <InboxList v-model="selectedEnvironment" :envs="filteredEnvironments" />
+      <PreviewenvironmentEnvironmentList v-model="selectedEnvironment" :envs="filteredEnvironments" />
     </UDashboardPanel>
 
     <UDashboardPanel v-model="isMailPanelOpen" collapsible grow side="right">
@@ -213,7 +182,7 @@ function onEnvironmentTabChange(index: number) {
           </template>
         </UDashboardNavbar>
 
-        <InboxMail :formState="formState" :createNewEnvironment @submit="saveEnvironment"
+        <PreviewenvironmentEnvironmentDetails :formState="formState" :createNewEnvironment @submit="saveEnvironment"
           v-if="selectedEnvironmentTab == 0" @deleteEnvironment="deleteEnvironment" :editModeActive="editMode" />
 
         <PreviewenvironmentInstanceList v-if="selectedEnvironmentTab == 1" :env="selectedEnvironment" />

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { PreviewEnvironment } from '~/types'
 import { storeToRefs } from 'pinia'
+import type { previewEnvironmentModel } from '#openapi-types'
 
 const props = defineProps<{
-  env: PreviewEnvironment
+  env: previewEnvironmentModel
 }>();
 
 const previewEnvironmentStore = usePreviewEnvironmentInstanceStore()
@@ -11,7 +11,7 @@ const previewEnvironmentStore = usePreviewEnvironmentInstanceStore()
 const { instances } = storeToRefs(previewEnvironmentStore);
 const { loadInstances } = previewEnvironmentStore;
 
-if (props.env.id)
+if (props.env?.id)
   await loadInstances(props.env.id);
 
 watch(props.env, async (newVal) => {
@@ -21,7 +21,11 @@ watch(props.env, async (newVal) => {
 
 const displayColumns = [
   {
-    key: 'gitSettings.branch',
+    key: "currentPhase",
+    label: "Phase",
+  },
+  {
+    key: 'instanceGitSettings.branch',
     label: 'Git Branch'
   },
   {

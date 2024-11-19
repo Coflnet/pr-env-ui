@@ -1,8 +1,10 @@
-import type Previewenvironments from "~/pages/previewenvironments.vue";
-
-// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   extends: ["@nuxt/ui-pro"],
+
+  alias: {
+    "#openapi-services": "./app/client/services.gen.ts",
+    "#openapi-types": "./app/client/types.gen.ts",
+  },
 
   modules: [
     "@nuxt/eslint",
@@ -26,6 +28,8 @@ export default defineNuxtConfig({
 
   oidc: {
     defaultProvider: "keycloak",
+
+    // TODO: figure out how to read this from the env
     providers: {
       keycloak: {
         clientId: "frontend",
@@ -33,7 +37,7 @@ export default defineNuxtConfig({
         baseUrl: "https://auth.coflnet.com/realms/pr-env",
         logoutRedirectUri: "https://tmpenv.app",
         exposeAccessToken: true,
-        redirectUri: "https://dash.tmpenv.app/auth/keycloak/callback",
+        redirectUri: "https://tmpenv.app/auth/keycloak/callback",
       },
     },
     middleware: {
@@ -55,15 +59,6 @@ export default defineNuxtConfig({
 
   devtools: {
     enabled: true,
-  },
-
-  openFetch: {
-    clients: {
-      Previewenvironments: {
-        schema: "https://dash.tmpenv.app/api/openapi/openapi.yaml",
-        baseURL: "https://dash.tmpenv.app/api/v1",
-      },
-    },
   },
 
   typescript: {

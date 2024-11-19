@@ -9,9 +9,11 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
-    "typecheck": "nuxt typecheck"
+    "typecheck": "nuxt typecheck",
+    "generate-openapi": "npx @hey-api/openapi-ts -i http://localhost:8080/api/openapi/openapi.yaml -o app/client -c @hey-api/client-fetch"
   },
   "dependencies": {
+    "@hey-api/client-fetch": "^0.4.3",
     "@iconify-json/heroicons": "^1.2.1",
     "@iconify-json/simple-icons": "^1.2.11",
     "@nuxt/fonts": "^0.10.2",
@@ -27,9 +29,11 @@
     "v-calendar": "^3.1.2"
   },
   "devDependencies": {
-    "@nuxt/eslint": "^0.6.1",
-    "eslint": "^9.14.0",
+    "@hey-api/openapi-ts": "^0.55.3",
+    "@nuxt/eslint": "^0.6.2",
+    "eslint": "^9.15.0",
     "nuxt-open-fetch": "^0.9.5",
+    "openapi-typescript-codegen": "^0.29.0",
     "vue-tsc": "^2.1.10"
   },
   "packageManager": "pnpm@9.12.2"

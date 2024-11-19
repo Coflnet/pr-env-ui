@@ -1,26 +1,32 @@
 import { defineStore } from "pinia";
-import type { PreviewEnvironment } from "../types/index.d.ts";
+import { getEnvironmentInstanceByIdList } from "#openapi-services";
+import type { previewEnvironmentInstanceModel } from "#openapi-types";
 
 export const usePreviewEnvironmentInstanceStore = defineStore(
   "previewEnvironmentInstance",
   () => {
-    const instances = ref<PreviewEnvironment[]>([]);
+    const instances = ref<previewEnvironmentInstanceModel[]>([]);
 
     async function loadInstances(envId: string) {
-      const user = useOidcAuth();
-      const { data } = await usePreviewenvironments(
-        "/environment-instance/{id}/list",
-        {
-          path: {
-            id: envId,
-          },
-          headers: {
-            authentication: user.user.value.accessToken,
-          },
-        },
-      );
+      const { user } = useOidcAuth();
 
-      instances.value = data.value as [];
+      let response = await getEnvironmentInstanceByIdList({
+        headers: {
+          authentication: `${user.value?.accessToken}`,
+        },
+        baseUrl: "https://tmpenv.app/api/v1",
+        path: {
+          id: envId,
+        }
+      })
+
+      if (response.error) {
+        console.log("Error fetching instances");
+        console.log(response.error);
+        return;
+      }
+
+      instances.value = response.data;
     }
 
     return {

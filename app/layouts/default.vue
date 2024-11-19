@@ -21,7 +21,7 @@ const links = [
     to: '/previewenvironments',
     badge: '',
     tooltip: {
-      text: 'Inbox',
+      text: 'Environments',
       shortcuts: ['G', 'I']
     }
   },

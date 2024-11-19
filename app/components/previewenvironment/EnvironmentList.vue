@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { format, isToday } from 'date-fns'
-import type { PreviewEnvironment } from '~/types'
+import type { previewEnvironmentModel } from '#openapi-types'
 
 const props = defineProps({
   modelValue: {
-    type: Object as PropType<PreviewEnvironment | null>,
+    type: Object as PropType<previewEnvironmentModel | null>,
     default: null
   },
   envs: {
-    type: Array<PreviewEnvironment>,
+    type: Array<previewEnvironmentModel>,
     default: () => []
   }
 })
@@ -21,7 +21,7 @@ const selectedEnv = computed({
   get() {
     return props.modelValue
   },
-  set(value: PreviewEnvironment | null) {
+  set(value: previewEnvironmentModel | null) {
     emit('update:modelValue', value)
   }
 })
