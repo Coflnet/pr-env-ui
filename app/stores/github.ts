@@ -2,6 +2,8 @@ import { defineStore } from "pinia";
 import { getGithubRepositories } from "#openapi-services";
 import type { githubRepositoryModel } from "#openapi-types";
 
+const baseUrl = "https://dash.tmpenv.app/api/v1"
+
 export const useGithubStore = defineStore(
   "github",
   () => {
@@ -15,7 +17,7 @@ export const useGithubStore = defineStore(
         headers: {
           authentication: `${user.value.accessToken}`,
         },
-        baseUrl: "https://tmpenv.app/api/v1",
+        baseUrl,
       });
 
       if (response.error) {

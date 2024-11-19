@@ -2,6 +2,8 @@ import { defineStore } from "pinia";
 import { deleteEnvironmentById, getEnvironmentList, postEnvironment } from "#openapi-services";
 import type { previewEnvironmentModel } from "#openapi-types";
 
+const baseUrl = "https://dash.tmpenv.app/api/v1";
+
 export const usePreviewEnvironmentStore = defineStore(
   "previewEnvironment",
   () => {
@@ -16,7 +18,7 @@ export const usePreviewEnvironmentStore = defineStore(
         headers: {
           authentication: `${user.value?.accessToken}`,
         },
-        baseUrl: "https://tmpenv.app/api/v1",
+        baseUrl,
       });
       if (response.data) {
         envs.value = response.data;
@@ -38,7 +40,7 @@ export const usePreviewEnvironmentStore = defineStore(
           headers: {
             authentication: `${user.value?.accessToken}`,
           },
-          baseUrl: "https://tmpenv.app/api/v1",
+          baseUrl,
           body: env,
         })
 
@@ -74,7 +76,7 @@ export const usePreviewEnvironmentStore = defineStore(
           headers: {
             authentication: `${user.value?.accessToken}`,
           },
-          baseUrl: "https://tmpenv.app/api/v1",
+          baseUrl,
           path: {
             id: env.id,
           }

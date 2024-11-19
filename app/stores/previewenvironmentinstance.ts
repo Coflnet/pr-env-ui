@@ -2,6 +2,8 @@ import { defineStore } from "pinia";
 import { getEnvironmentInstanceByIdList } from "#openapi-services";
 import type { previewEnvironmentInstanceModel } from "#openapi-types";
 
+const baseUrl = "https://dash.tmpenv.app/api/v1";
+
 export const usePreviewEnvironmentInstanceStore = defineStore(
   "previewEnvironmentInstance",
   () => {
@@ -14,7 +16,7 @@ export const usePreviewEnvironmentInstanceStore = defineStore(
         headers: {
           authentication: `${user.value?.accessToken}`,
         },
-        baseUrl: "https://tmpenv.app/api/v1",
+        baseUrl,
         path: {
           id: envId,
         }
