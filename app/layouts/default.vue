@@ -4,16 +4,16 @@ const appConfig = useAppConfig()
 const { isHelpSlideoverOpen } = useDashboard()
 
 const links = [
-  {
-    id: 'home',
-    label: 'Home',
-    icon: 'i-heroicons-home',
-    to: '/',
-    tooltip: {
-      text: 'Home',
-      shortcuts: ['G', 'H']
-    }
-  },
+  // {
+  //   id: 'home',
+  //   label: 'Home',
+  //   icon: 'i-heroicons-home',
+  //   to: '/',
+  //   tooltip: {
+  //     text: 'Home',
+  //     shortcuts: ['G', 'H']
+  //   }
+  // },
   {
     id: 'previewenvironments',
     label: 'Preview Environments',
