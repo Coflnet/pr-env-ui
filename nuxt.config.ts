@@ -27,7 +27,7 @@ export default defineNuxtConfig({
         keycloak: {
           clientId: '',
           clientSecret: '',
-          baseUrl: '',
+          baseUrl: 'https://auth.coflnet.com/realms/pr-env',
           logoutRedirectUri: "https://tmpenv.app",
           exposeAccessToken: true,
           redirectUri: "https://dash.tmpenv.app/auth/keycloak/callback",
