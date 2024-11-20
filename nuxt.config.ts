@@ -1,6 +1,45 @@
 export default defineNuxtConfig({
   extends: ["@nuxt/ui-pro"],
 
+  $development: {
+    oidc: {
+      defaultProvider: "keycloak",
+      providers: {
+        keycloak: {
+          clientId: '',
+          clientSecret: '',
+          baseUrl: '',
+          logoutRedirectUri: "https://tmpenv.app",
+          exposeAccessToken: true,
+          redirectUri: "http://localhost:3000/auth/keycloak/callback",
+        },
+      },
+      middleware: {
+        globalMiddlewareEnabled: true,
+        customLoginPage: false,
+      },
+    },
+  },
+  $production: {
+    oidc: {
+      defaultProvider: "keycloak",
+      providers: {
+        keycloak: {
+          clientId: '',
+          clientSecret: '',
+          baseUrl: '',
+          logoutRedirectUri: "https://tmpenv.app",
+          exposeAccessToken: true,
+          redirectUri: "https://dash.tmpenv.app/auth/keycloak/callback",
+        },
+      },
+      middleware: {
+        globalMiddlewareEnabled: true,
+        customLoginPage: false,
+      },
+    },
+  },
+
   alias: {
     "#openapi-services": "./app/client/services.gen.ts",
     "#openapi-types": "./app/client/types.gen.ts",
@@ -26,25 +65,6 @@ export default defineNuxtConfig({
 
   ssr: true,
 
-  oidc: {
-    defaultProvider: "keycloak",
-
-    // TODO: figure out how to read this from the env
-    providers: {
-      keycloak: {
-        clientId: "frontend",
-        clientSecret: "A4ALzb6rlwhHaHj8AzXPfq6SaptLABH5",
-        baseUrl: "https://auth.coflnet.com/realms/pr-env",
-        logoutRedirectUri: "https://tmpenv.app",
-        exposeAccessToken: true,
-        redirectUri: "https://dash.tmpenv.app/auth/keycloak/callback",
-      },
-    },
-    middleware: {
-      globalMiddlewareEnabled: true,
-      customLoginPage: false,
-    },
-  },
 
   pinia: {
     storesDirs: ["./stores/**", "./app/stores/**"],
