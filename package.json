@@ -23,7 +23,7 @@
     "@unovis/vue": "^1.4.4",
     "@vueuse/nuxt": "^11.2.0",
     "date-fns": "^4.1.0",
-    "nuxt": "^3.14.159",
+    "nuxt": "^3.16.0",
     "nuxt-oidc-auth-flou": "^4.0.0",
     "pinia": "^2.2.6",
     "v-calendar": "^3.1.2"
@@ -36,5 +36,14 @@
     "openapi-typescript-codegen": "^0.29.0",
     "vue-tsc": "^2.1.10"
   },
-  "packageManager": "pnpm@9.12.2"
+  "packageManager": "pnpm@9.12.2",
+  "pnpm": {
+    "overrides": {
+      "@nuxtjs/mdc": "^0.17.2",
+      "unhead": "^2.1.13",
+      "esbuild": "^0.25.0",
+      "handlebars": "^4.7.9",
+      "tar": "^7.5.13"
+    }
+  }
 }
